@@ -328,7 +328,7 @@ class ConfigProdigy:
                             hardware_report.get("Monitor", {}),
                             macos_version
                         ))
-                        if deviceproperties_add[gpu_info.get("PCI Path", "PciRoot(0x0)/Pci(0x2,0x0)")]:
+                        if deviceproperties_add.get(gpu_info.get("PCI Path", "PciRoot(0x0)/Pci(0x2,0x0)")):
                             if gpu_info.get("Codename") in ("Sandy Bridge", "Ivy Bridge"):
                                 for device_name, device_info in hardware_report.get("System Devices", {}).items():
                                     device_id = device_info.get("Device ID")

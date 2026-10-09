@@ -5,6 +5,11 @@ from Scripts.datasets import codec_layouts
 from Scripts import utils
 import time
 
+# Set to False to restore the original behaviour.
+# When True, GPUs that would be marked "Unsupported" are treated as usable on every
+# macOS version, so the tool keeps them in the build instead of exiting/disabling them.
+FORCE_GPU_SUPPORT = True
+
 class CompatibilityChecker:
     def __init__(self):
         self.utils = utils.Utils()
@@ -178,7 +183,11 @@ class CompatibilityChecker:
             if (max_version == min_version and max_version == None) or \
                 ( "Intel" in gpu_manufacturer and device_id.startswith(("01", "04", "0A", "0C", "0D")) and \
                   all(monitor_info.get("Connector Type") == "VGA" and monitor_info.get("Connected GPU", gpu_name) == gpu_name for monitor_name, monitor_info in self.hardware_report.get("Monitor", {}).items())):
-                gpu_props["Compatibility"] = (None, None)
+                if FORCE_GPU_SUPPORT:
+                    gpu_props["Compatibility"] = (os_data.get_latest_darwin_version(), os_data.get_lowest_darwin_version())
+                    print("{}\033[1;93m[FORCED]\033[0m {} is not natively supported; treating it as supported.".format(" "*6, gpu_name))
+                else:
+                    gpu_props["Compatibility"] = (None, None)
             else:
                 gpu_props["Compatibility"] = (max_version, min_version)
                 if self.utils.parse_darwin_version(max_version) < self.utils.parse_darwin_version(ocl_patched_max_version):
